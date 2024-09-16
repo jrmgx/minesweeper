@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+        min-height: 100vh;
+        max-width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Minesweeper</h1>
+    <select name="select-game-mode" id="select-game-mode">
+      <option value="easy">Easy - 9x9 / 10 Mines</option>
+      <option value="normal" selected>Normal - 16x16 / 40 Mines</option>
+      <option value="hard">Hard - 16x30 / 99 Mines</option>
+    </select>
+    <p><span id="bomb-counter"></span> Mines</p>
+    <minesweeper-game
+      id="minesweeper"
+      restart-selector="#restart-game-button"
+      bomb-counter-selector="#bomb-counter"
+      rows="16"
+      columns="16"
+      bombs="40"
+    ></minesweeper-game>
+    <p>
+      <button id="restart-game-button-confirm">Restart?</button>
+    </p>
+
+    <script type="module">
+      import './dist/custom-element.js';
+      import { MinesweeperGame } from './dist/minesweeper-game.js';
+
+      function getGameModeConfiguration(currentGameMode) {
+        switch (currentGameMode) {
+          case 'hard':
+            return {
+              columns: 30,
+              rows: 16,
+              bombs: 99,
+            };
+          case 'easy':
+            return {
+              columns: 9,
+              rows: 9,
+              bombs: 10,
+            };
+          default:
+            return {
+              columns: 16,
+              rows: 16,
+              bombs: 40,
+            };
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        /** @type {MinesweeperGame} **/
+        const minesweeper = document.querySelector('#minesweeper');
+
+        minesweeper.addEventListener('minesweeper:game-won', (event) => {
+          setTimeout(() => {
+            window.alert('You won!');
+          }, 1000);
+        });
+
+        minesweeper.addEventListener('minesweeper:game-lost', (event) => {
+          setTimeout(() => {
+            window.alert('You lost!');
+          }, 1000);
+        });
+
+        document
+          .querySelector('#restart-game-button-confirm')
+          .addEventListener('click', (event) => {
+            event.preventDefault();
+            if (
+              window.confirm('Are you sure, that you want to restart the game?')
+            ) {
+              minesweeper.restartGame();
+            }
+          });
+
+        document.querySelector('#select-game-mode').addEventListener('change', (event) => {
+          event.preventDefault();
+
+          const gameModeConfiguration = getGameModeConfiguration(event.target.value);
+          minesweeper.setGameModeConfiguration(gameModeConfiguration);
+        });
+      });
+    </script>
+  </body>
+</html>
